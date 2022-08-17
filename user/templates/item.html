@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h3 class="text-center">{{ title }}</h3>
+    {% if  not movies %}
+        <h3 class="text-center">Oops. We haven't got that.</h3>
+    {% endif %}
+    <div class="container-fluid">
+        <div class="row clearfix">
+            {% for movie in movies %}
+                <div class="col-md-3 col-xs-6" style="height: 340px">
+                    <img class="img-thumbnail img-rounded" width="189px" height="267px" src="{{ MEDIA_URL }}{{ movie.image_link }}">
+                    <h4 style="overflow: hidden">
+                        <a href="{% url 'movie' movie.id %}">    {{ movie.name }}</a>
+                    </h4>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container-fluid">
+    <div class="col-md-9 col-md-offset-1">
+        {% if movies.has_other_pages %}
+            <ul class="pagination">
+                {% if movies.has_previous %}
+                    <li><a href="?page={{ movies.previous_page_number }}">Prev</a></li>
+                {% else %}
+                    <li class="disabled"><span>&laquo;</span></li>
+                {% endif %}
+                {% for l in  movies.paginator.page_range %}
+                    {% if l <= movies.number|add:5 and l >= movies.number|add:-5 %}
+                        {% if movies.number == l %}
+                            <li class="active"><span>{{ l }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <li class="item"><a href="#">
+                    {{ movies.number }}/{{ movies.paginator.num_pages }}</a>
+                </li>
+                {% if movies.has_next %}
+                    <li><a href="?page={{ movies.next_page_number }}">Next</a></li>
+                {% else %}
+                    <li class="disabled"><span>&raquo;</span></li>
+                {% endif %}
+            </ul>
+        {% endif %}
+        {#                分页结束#}
+    </div>
+    <script>
+
+    setTimeout(function () {
+        document.querySelector("#wrap > div.container > div > div > div.col-md-3").style.display="none";
+    },100)
+    </script>
+{% endblock %}

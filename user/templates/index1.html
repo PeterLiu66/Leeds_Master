@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+    <div id="app2">
+
+
+            <div class="tab-pane fade in" id="tab1">
+            <span>History</span>
+                <div class="row">
+                    {% for movie in res %}
+                        <div class="col-md-3" style="height: 330px">
+                            <a _boss="film" href="/movie/{{ movie.news_id }}" target="_blank" class="figure" tabindex="-1">
+                                <img class="img-responsive img-rounded" width="190px" height="270px" src="{{ movie.image_url }}" alt="{{ movie.news_title }}">
+                            </a>
+                            <strong>
+                                <a _boss="film" style="overflow: hidden" href="/movie/{{ movie.news_id }}" target="_blank" title="{{ movie.news_title }}">{{ movie.news_title }}</a>
+                            </strong>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+
+    </div>
+{% endblock %}
+{% block rightside %}
+{% endblock %}

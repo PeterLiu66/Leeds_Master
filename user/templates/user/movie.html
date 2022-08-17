@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load grav_tag %}
+{% load is_like %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row clearfix">
+            <div class="col-md-4">
+                <img class="img-thumbnail movie-image" src="{{ MEDIA_URL }}{{ movie.image_link }}"/></div>
+            <div class="col-md-8 column">
+                <ol class="list-unstyled">
+                    <li style="display: block">
+                        <h2 align="center">{{ movie.name }}    </h2>
+                    </li>
+                    <li style="display: block; padding: 10px;">
+                        <h4 style="margin: auto" align="center"> Director: {{ movie.director }}
+                            {% if movie.tags.all %}
+                                Tag:
+                                {% for tag in movie.tags.all %}
+                                    {{ tag }}
+                                {% endfor %}
+                            {% else %}
+                                无
+                            {% endif %}
+                        </h4>
+                    </li>
+                    <li><h4>{{ movie.intro.strip }}</h4></li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                {#                    <p> 豆瓣评分:{{ movie.d_rate }}</p>#}
+                {% if user_rate is not None %} <h4>Your score: {{ user_rate.mark }}</h4> {% else %}
+                    <form action="{% url 'score' movie.id %}" method="post">{% csrf_token %}
+                        <select style="margin-top: 10px" class="form-control" name="score">
+                            <option>1.0</option>
+                            <option>2.0</option>
+                            <option>3.0</option>
+                            <option>4.0</option>
+                            <option>5.0</option>
+                        </select>
+                        <div>
+                            <button style="margin-top: 10px;margin-bottom: 10px" type="submit" class="btn btn-block">Rating</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3> Collection:{{ movie.collect.count }} {% if is_collect %}
+                        <a class="btn btn-warning" style="padding-bottom: 10px; margin-left: 10px" href="{% url 'decollect' movie.id %}">Cancel</a>
+                    {% else %}
+                        <a class="btn btn-primary " style="padding-bottom: 10px; margin-left: 10px" href="{% url 'collect' movie.id %}">Add to list</a>{% endif %}
+                    </h3>
+                </div>
+                <div class="col-md-6">
+                    <!-- <h3 style="display: inline-block">
+                        Rating:{{ movie.rate_set.count }}&nbsp;&nbsp;&nbsp;
+                    </h3> -->
+                    <h3 style="float: right; display: inline-block"> Movie Rating: {% if movie_rate %} {{ movie_rate |floatformat:2 }} {% else %} 0 {% endif %}</h3>
+                </div>
+            </div>
+            <div class="widget wid-related">
+                <div class="wid-header">
+                    <div class="row" style="border-top: #0c0e0f 2px dashed">
+                        <div class="col-md-9">
+                            <h2>Recommendations for you</h2>
+                        </div>
+                        <div class="col-md-3">
+                            <h2>
+                                <button class="btn-block  btn-success" onclick="get_item_recommend">More</button>
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% verbatim app2 %}
+                            <div id="app2">
+                                    <div class="col-md-3" v-for="movie in movies.slice(0,4)">
+                                        <img class="img-rounded img-responsive" v-bind:src="movie.image_link" alt="">
+                                        <a v-bind:href="'/movie/'+movie.id"><h5>{{ movie.name }}</h5></a>
+                                        <h5>{{ movie.years }}</h5>
+                                    </div>
+                            </div>
+                        {% endverbatim app2 %}
+                    </div>
+                </div>
+                <div class="wid-content">
+                    <div class="row" id="item-recommend">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="row">
+                <div class="col-md-12">
+                    <form role="form" class="" action="{% url 'comment' movie.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row" style="margin-top: 50px" >
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <input placeholder="" class="form-control" name="comment" cols="10" rows="10">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-block btn-primary">Comments</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2 style="border-bottom: dashed #a5a5a5 1px; padding-bottom: 10px">Movie Reviews</h2>
+                        <div class="item-list">
+                            <ul>
+                                {% for i in comments %}
+                                    <li class="list-item" style="background-color: #C0C0C0">
+                                        <div class="avartar"><a>
+                                            <img class="img-rounded" src='{{ i.user.email|gravatar:"75" }}'> </a>
+                                        </div>
+                                        <div class="list-info">
+                                            <p>{{ i.content }}</p>
+                                            {{ i.user.username }} posted at {{ i.create_time }}
+                                        </div>
+                                        {#                                    已点赞#}
+                                        {% if  i.id|is_like:i.user.id %}
+                                            <a href="{% url 'unlike_comment' i.id movie.id %}" class="recommend-link"><span class="fa fa-lg fa-thumbs-up"
+                                                                                                                            style="color: orange">({{ i.likecomment_set.count }})</span></a>
+                                        {% else %}
+                                            <a href="{% url 'like_comment' i.id movie.id %}" class="recommend-link"><span class="fa fa-lg fa-thumbs-up">({{ i.likecomment_set.count }})</span></a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        var app2 = new Vue({
+            el: '#app2',
+            data: {
+                movies: [],
+                name: 'app2',
+            },
+            created(){
+                this.get_item_recommend();
+            },
+
+            methods: {
+                get_item_recommend: function () {
+                    console.log("{{ request.session.user_id }}");
+                    if ("{{ request.session.user_id }}" === "") {
+                    }
+                    axios.get('/api/item_recommend/{{ request.session.user_id}}').then(function (res) {
+                        app2.movies = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                },
+            }
+        });
+
+    </script>
+
+{% endblock %}
+
+

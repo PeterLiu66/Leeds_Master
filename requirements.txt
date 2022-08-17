@@ -1,0 +1,9 @@
+Django==3.1.7
+django-simpleui==2021.4.1
+djangorestframework==3.12.2
+pymysql==1.0.2
+django-cors-headers==3.7.0
+#icecola==0.5
+# pyspark==2.4.5
+# pandas==1.0.3
+#gunicorn==19.9

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load grav_tag %}
+{% block css %}
+
+    <style>
+        a:visited a:hover {
+            text-decoration: none;
+        }
+
+        li:active {
+            background-color: #f7f2ff;
+            text-decoration: none;
+        }
+
+        .left-box {
+            margin-top: 30px;
+            background-color: #f5f6f7;
+            border: 1px solid #a5a5a5;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .05);
+        }
+
+        .left-box li {
+            display: block;
+            font-size: 20px;
+        }
+
+        .right-content {
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .05);
+            background-color: #f5f6f7;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        {#<h1 align="center">个人信息</h1>#}
+        <div class="row">
+            <div id="app1">
+                <div class="col-md-3">
+                    <div class="left-box">
+                        <ul class="list-group">
+                            <li class="list-item">My details</li>
+                            <li v-on:click="my_rate">My rates</li>
+                            <li v-on:click="my_collect">My collects</li>
+                            <li v-on:click="my_comment">My comments</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="right-content">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12">
+                                    <img CLASS="img-responsive img-circle" src='{{ user.email|gravatar:"150" }}'>
+                                </div>
+                                <div class="col-md-8 col-sm-12">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h2>
+                                                Username: {{ user.username }}
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <h2>
+                                            Email: {{ user.email }}
+                                        </h2>
+                                    </div>
+                                    <div class="row">
+                                        <h2>
+                                            <a href="/begin/">Edit</a>
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% verbatim myblock %}
+                            <table class="table" style="margin-top: 10px">
+                                <thead>
+                                <tr>
+                                    <th v-for="(value,index) in tables[0]" v-text="index"></th>
+                                </tr>
+                                </thead>
+                                <tr v-for="table in tables">
+                                    <td v-for="(value,index) in table" v-text="value"></td>
+                                    <td v-show="rate==1"><a class="btn btn-danger" v-on:click="delete_comment(table)">Delete</a></td>
+                                </tr>
+                            </table>
+                        {% endverbatim myblock %}
+                    </div>
+                </div>
+            </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+            <script>
+                var app1 = new Vue({
+            el: '#app1',
+            data: {
+                tables: [],
+                rate:0,
+            },
+            methods: {
+                my_rate: function () {
+                    app1.rate = 0
+                    axios.get('/api/rate/{{ user.id }}').then(function (res) {
+
+                        app1.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_collect: function () {
+                    app1.rate = 0
+                    axios.get('/api/collect/{{ user.id }}').then(function (res) {
+                        app1.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                ,
+                my_comment: function () {
+                    app1.rate = 1
+                    axios.get('/api/comment/{{ user.id }}').then(function (res) {
+                        app1.tables = res.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                },
+                delete_comment(comments){
+                    console.log(comments)
+                    axios.get('/api/comment_delete/'+comments.Comments_id).then(function (res) {
+                        app1.my_comment()
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            }
+        })
+            </script>
+        </div>
+    </div>
+{% endblock %}
+
+
